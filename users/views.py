@@ -10,6 +10,9 @@ from .models import Profile, Follow
 from .forms import ProfileForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
+from rest_framework import status
+from rest_framework.response import Response
+from django.utils.decorators import method_decorator
 
 class UserLogin(View):
     def get(self, request):
@@ -42,8 +45,8 @@ class UserRegistration(View):
             return redirect('user_login')
         return render(request, 'users/registration.html', {'form': form})
 class ProfileView(View):
-    def get(self, request, user_id, format=None):
-        user = get_object_or_404(User, id=user_id)
+    def get(self, request, id, format=None):
+        user = get_object_or_404(User, id=id)
         posts = user.post_set.all()
 
         # Получаем пользователей, которые следуют за данным пользователем
@@ -60,17 +63,17 @@ class ProfileView(View):
             'is_following': is_following,
         })
 class ProfileEdit(APIView):
-    def get(self, request, user_id, format=None):
-        user = get_object_or_404(User, id=user_id)
+    def get(self, request, id, format=None):
+        user = get_object_or_404(User, id=id)
         return render(request, 'users/profile.html', {
             'user': user,
             'is_following': request.user.following.filter(id=user.id).exists(),
         })
 
-    def post(self, request, user_id, format=None):
-        user = get_object_or_404(User, id=user_id)
+    def post(self, request, id, format=None):
+        user = get_object_or_404(User, id=id)
         if request.user != user:
-            return redirect('user-profile', user_id=user_id)
+            return redirect('user-profile', id=id)
 
         # Обновление профиля пользователя
         bio = request.POST.get('bio')
@@ -86,20 +89,22 @@ class ProfileEdit(APIView):
             # Создаем профиль, если его нет
             Profile.objects.create(user=user, bio=bio, profile_picture=profile_picture)
 
-        return redirect('user-profile', user_id=user_id)
+        return redirect('user-profile', id=id)
 
-class FollowUser(View):
-    @login_required
+@method_decorator(login_required, name='dispatch')
+class FollowUser(APIView):
     def post(self, request, id):
         user_to_follow = get_object_or_404(User, id=id)
-        # Check if the user is already followed to avoid duplicates
         if not Follow.objects.filter(follower=request.user, following=user_to_follow).exists():
             Follow.objects.create(follower=request.user, following=user_to_follow)
-        return redirect('profile_view', id=id)  # Use the appropriate name for your profile view
-
-class UnfollowUser(View):
-    @login_required
+            return Response({"message": "Successfully followed."}, status=status.HTTP_201_CREATED)
+        return Response({"message": "Already following."}, status=status.HTTP_400_BAD_REQUEST)
+@method_decorator(login_required, name='dispatch')
+class UnfollowUser(APIView):
     def post(self, request, id):
         user_to_unfollow = get_object_or_404(User, id=id)
-        Follow.objects.filter(follower=request.user, following=user_to_unfollow).delete()
-        return redirect('profile_view', id=id)  # Use the appropriate name for your profile view
+        follow_record = Follow.objects.filter(follower=request.user, following=user_to_unfollow)
+        if follow_record.exists():
+            follow_record.delete()
+            return Response({"message": "Successfully unfollowed."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Not following this user."}, status=status.HTTP_400_BAD_REQUEST)
