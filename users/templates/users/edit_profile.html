@@ -1,0 +1,11 @@
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="bio">Bio:</label>
+    <textarea name="bio" id="bio">{{ user.profile.bio }}</textarea>
+  
+    <label for="profile_picture">Profile Picture:</label>
+    <input type="file" name="profile_picture" id="profile_picture">
+  
+    <button type="submit">Save</button>
+  </form>
+  

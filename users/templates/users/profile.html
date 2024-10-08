@@ -1,0 +1,24 @@
+<h1>{{ user.username }}'s Profile</h1>
+<img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture">
+<p>{{ user.profile.bio }}</p>
+
+<h3>Followers: {{ followers|length }}</h3>
+<ul>
+  {% for follower in followers %}
+    <li>{{ follower.username }}</li>
+  {% endfor %}
+</ul>
+
+<h3>Following: {{ following|length }}</h3>
+<ul>
+  {% for follow in following %}
+    <li>{{ follow.username }}</li>
+  {% endfor %}
+</ul>
+
+{% if is_following %}
+  <p>You are following this user.</p>
+{% else %}
+  <p>You are not following this user.</p>
+{% endif %}
+    

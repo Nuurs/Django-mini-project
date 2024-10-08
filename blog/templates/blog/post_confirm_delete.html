@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Post</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Delete Post</h1>
+        <p>Are you sure you want to delete the post titled "{{ post.title }}"?</p>
+        <div class="buttons">
+            <form action="{% url 'post_delete' post.id %}" method="post">
+                {% csrf_token %}
+                <input type="submit" value="Confirm Delete">
+            </form>
+            <a href="{% url 'post_detail' post.id %}">Cancel</a>
+        </div>
+    </div>
+</body>
+</html>
