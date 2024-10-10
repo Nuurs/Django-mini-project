@@ -27,7 +27,7 @@ class UserLogin(View):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('post_list')  # Redirect to your blog list or any page
+                return redirect('post_list')  
         return render(request, 'users/login.html', {'form': form})
 class UserLogout(View):
     def get(self, request):
@@ -49,10 +49,10 @@ class ProfileView(View):
         user = get_object_or_404(User, id=id)
         posts = user.post_set.all()
 
-        # Получаем пользователей, которые следуют за данным пользователем
+       
         followers = [follow.follower for follow in user.followers.all()]
         following = [follow.following for follow in user.following.all()]
-        # Проверяем, подписан ли текущий пользователь на профиль
+        
         is_following = Follow.objects.filter(follower=request.user, following=user).exists()
 
         return render(request, 'users/profile.html', {
@@ -62,34 +62,35 @@ class ProfileView(View):
             'following': following,  
             'is_following': is_following,
         })
+
 class ProfileEdit(APIView):
     def get(self, request, id, format=None):
         user = get_object_or_404(User, id=id)
-        return render(request, 'users/profile.html', {
+        return render(request, 'users/edit_profile.html', {
             'user': user,
-            'is_following': request.user.following.filter(id=user.id).exists(),
         })
 
     def post(self, request, id, format=None):
         user = get_object_or_404(User, id=id)
-        if request.user != user:
-            return redirect('user-profile', id=id)
 
-        # Обновление профиля пользователя
+        if request.user != user:
+            return redirect('profile_view', id=id)
+
+
         bio = request.POST.get('bio')
         profile_picture = request.FILES.get('profile_picture')
 
-        # Проверка, существует ли профиль
         if hasattr(user, 'profile'):
             user.profile.bio = bio
             if profile_picture:
                 user.profile.profile_picture = profile_picture
             user.profile.save()
         else:
-            # Создаем профиль, если его нет
             Profile.objects.create(user=user, bio=bio, profile_picture=profile_picture)
 
-        return redirect('user-profile', id=id)
+        return redirect('profile_view', id=id)  
+
+
 
 @method_decorator(login_required, name='dispatch')
 class FollowUser(APIView):

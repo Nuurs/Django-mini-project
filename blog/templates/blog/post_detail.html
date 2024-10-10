@@ -29,6 +29,29 @@
             text-align: center;
             margin: 20px 0;
         }
+        .comments-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #e9e9e9;
+        }
+        .comment {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+        .add-comment {
+            margin-top: 20px;
+            padding: 10px 0;
+            background-color: #f9f9f9;
+        }
+        .add-comment form {
+            display: flex;
+            flex-direction: column;
+        }
+        .add-comment textarea {
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -37,6 +60,7 @@
         <div class="content">
             <p>{{ post.content }}</p>
         </div>
+
         <div class="buttons">
             <a href="{% url 'post_edit' post.id %}">Edit</a>
             <form action="{% url 'post_delete' post.id %}" method="post" style="display:inline;">
@@ -45,6 +69,30 @@
             </form>
             <a href="{% url 'post_list' %}">Back to Posts</a>
         </div>
+
+        <!-- Add Comment Section -->
+        <div class="comments-section">
+            <h2>Comments</h2>
+            {% for comment in post.comments.all %}
+                <div class="comment">
+                    <strong>{{ comment.author.username }}:</strong>
+                    <p>{{ comment.content }}</p>
+                </div>
+            {% empty %}
+                <p>No comments yet.</p>
+            {% endfor %}
+
+            <!-- Add a Comment Form -->
+            <div class="add-comment">
+                <h3>Add a Comment</h3>
+                <form method="POST" action="{% url 'add_comment' post.id %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Add Comment</button>
+                </form>
+            </div>
+        </div>
+
     </div>
 </body>
 </html>

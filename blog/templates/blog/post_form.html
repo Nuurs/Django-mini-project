@@ -56,6 +56,7 @@
 
             <label for="content">Content:</label>
             <textarea id="content" name="content" rows="10" required>{% if post %}{{ post.content }}{% endif %}</textarea>
+            {{ form.author }}
 
             <input type="submit" value="{% if post %}Update{% else %}Create{% endif %}">
         </form>

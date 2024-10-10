@@ -1,24 +1,80 @@
-<h1>{{ user.username }}'s Profile</h1>
-<img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture">
-<p>{{ user.profile.bio }}</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}'s Profile</title>
+    <style>
+        /* Basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .bio {
+            margin: 20px 0;
+            font-style: italic; /* Optional styling */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ user.username }}'s Profile</h1>
+        
+        {% if user.profile.profile_picture %}
+            <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" style="max-width: 150px; height: auto;">
+        {% else %}
+            <p>No profile picture uploaded.</p>
+        {% endif %}
+        <p>{{ user.profile.bio }}</p>
+        
+        <div class="bio">
+            <h3>Bio:</h3>
+            <p>{{ user.profile.bio|default:"No bio available." }}</p>
+        </div>
 
-<h3>Followers: {{ followers|length }}</h3>
-<ul>
-  {% for follower in followers %}
-    <li>{{ follower.username }}</li>
-  {% endfor %}
-</ul>
+        <div class="buttons">
+            {% if is_following %}
+                <form action="{% url 'unfollow_user' user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="submit" value="Unfollow">
+                </form>
+            {% else %}
+                <form action="{% url 'follow_user' user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="submit" value="Follow">
+                </form>
+            {% endif %}
+        </div>
 
-<h3>Following: {{ following|length }}</h3>
-<ul>
-  {% for follow in following %}
-    <li>{{ follow.username }}</li>
-  {% endfor %}
-</ul>
+        <h3>Followers: {{ followers|length }}</h3>
+        <ul>
+            {% for follower in followers %}
+                <li>{{ follower.username }}</li>
+            {% endfor %}
+        </ul>
 
-{% if is_following %}
-  <p>You are following this user.</p>
-{% else %}
-  <p>You are not following this user.</p>
-{% endif %}
-    
+        <h3>Following: {{ following|length }}</h3>
+        <ul>
+            {% for follow in following %}
+                <li>{{ follow.username }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

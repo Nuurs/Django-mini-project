@@ -24,7 +24,6 @@ class PostCreate(APIView):
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
-            post.author = request.user
             post.save()
             return redirect('post_detail', id=post.id)
         return render(request, 'blog/post_form.html', {'form': form})
@@ -64,3 +63,5 @@ class AddComment(APIView):
             comment.save()
             return redirect('post_detail', id=id)
         return render(request, 'blog/post_detail.html', {'post': post, 'form': form})
+  
+
