@@ -1,21 +1,21 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views import View
 from .models import Post
 from .forms import PostForm, CommentForm
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 
-class PostList(APIView):
+class PostList(View):
     def get(self, request):
         posts = Post.objects.all()
         return render(request, 'blog/post_list.html', {'posts': posts})
 
-class PostDetail(APIView):
+class PostDetail(View):
     def get(self, request, id):
         post = get_object_or_404(Post, id=id)
-        return render(request, 'blog/post_detail.html', {'post': post})
+        comments = post.comments.all()  # Предполагается, что у вас есть связь комментариев с постами
+        form = CommentForm()  # Форма для добавления комментария
+        return render(request, 'blog/post_detail.html', {'post': post, 'comments': comments, 'form': form})
 
-class PostCreate(APIView):
+class PostCreate(View):
     def get(self, request):
         form = PostForm()
         return render(request, 'blog/post_form.html', {'form': form})
@@ -28,7 +28,7 @@ class PostCreate(APIView):
             return redirect('post_detail', id=post.id)
         return render(request, 'blog/post_form.html', {'form': form})
 
-class PostEdit(APIView):
+class PostEdit(View):
     def get(self, request, id):
         post = get_object_or_404(Post, id=id)
         form = PostForm(instance=post)
@@ -42,7 +42,7 @@ class PostEdit(APIView):
             return redirect('post_detail', id=post.id)
         return render(request, 'blog/post_form.html', {'form': form})
 
-class PostDelete(APIView):
+class PostDelete(View):
     def get(self, request, id):
         post = get_object_or_404(Post, id=id)
         return render(request, 'blog/post_confirm_delete.html', {'post': post})
@@ -52,7 +52,7 @@ class PostDelete(APIView):
         post.delete()
         return redirect('post_list')
 
-class AddComment(APIView):
+class AddComment(View):
     def post(self, request, id):
         post = get_object_or_404(Post, id=id)
         form = CommentForm(request.POST)
@@ -62,6 +62,5 @@ class AddComment(APIView):
             comment.author = request.user
             comment.save()
             return redirect('post_detail', id=id)
-        return render(request, 'blog/post_detail.html', {'post': post, 'form': form})
-  
-
+        comments = post.comments.all()  # Получаем все комментарии для отображения
+        return render(request, 'blog/post_detail.html', {'post': post, 'comments': comments, 'form': form})

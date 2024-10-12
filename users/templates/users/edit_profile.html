@@ -25,15 +25,6 @@
             display: flex;
             flex-direction: column;
         }
-        label {
-            margin: 10px 0 5px;
-        }
-        input[type="text"], input[type="file"], textarea {
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
         input[type="submit"] {
             background: #5cb85c;
             color: white;
@@ -51,12 +42,7 @@
         <h1>Edit Profile</h1>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <label for="bio">Bio:</label>
-            <textarea id="bio" name="bio" rows="4">{{ user.profile.bio }}</textarea>
-
-            <label for="profile_picture">Profile Picture:</label>
-            <input type="file" id="profile_picture" name="profile_picture">
-
+            {{ form.as_p }}
             <input type="submit" value="Update Profile">
         </form>
     </div>
