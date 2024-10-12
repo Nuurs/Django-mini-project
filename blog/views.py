@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from .models import Post
 from .forms import PostForm, CommentForm
+from django.utils import timezone
+
 
 class PostList(View):
     def get(self, request):
@@ -11,8 +13,8 @@ class PostList(View):
 class PostDetail(View):
     def get(self, request, id):
         post = get_object_or_404(Post, id=id)
-        comments = post.comments.all()  # Предполагается, что у вас есть связь комментариев с постами
-        form = CommentForm()  # Форма для добавления комментария
+        comments = post.comments.all()  
+        form = CommentForm()  
         return render(request, 'blog/post_detail.html', {'post': post, 'comments': comments, 'form': form})
 
 class PostCreate(View):
@@ -24,6 +26,8 @@ class PostCreate(View):
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
+            post.author = request.user
+            post.created_at = timezone.now()
             post.save()
             return redirect('post_detail', id=post.id)
         return render(request, 'blog/post_form.html', {'form': form})
@@ -62,5 +66,5 @@ class AddComment(View):
             comment.author = request.user
             comment.save()
             return redirect('post_detail', id=id)
-        comments = post.comments.all()  # Получаем все комментарии для отображения
+        comments = post.comments.all()  
         return render(request, 'blog/post_detail.html', {'post': post, 'comments': comments, 'form': form})

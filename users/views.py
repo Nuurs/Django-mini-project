@@ -46,12 +46,14 @@ class ProfileView(View):
         posts = user.post_set.all()
         followers = user.followers.all()
         following = user.following.all()
+        is_following = Follow.objects.filter(follower=request.user, following=user).exists()
         
         return render(request, 'users/profile.html', {
             'user': user,
             'posts': posts,
             'followers': followers,  
             'following': following,  
+            'is_following': is_following,
         })
 
 class ProfileEdit(View):
