@@ -76,7 +76,9 @@ class ProfileEdit(View):
         profile, created = Profile.objects.get_or_create(user=user)
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            form.save()
+            profile = form.save(commit=False)
+            profile.user = user  
+            profile.save()  
             return redirect('profile_view', id=id)
 
         return render(request, 'users/edit_profile.html', {
